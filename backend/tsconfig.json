@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "rootDir": "src",
+    "ignoreDeprecations": "6.0",
+    "target": "ES2023",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

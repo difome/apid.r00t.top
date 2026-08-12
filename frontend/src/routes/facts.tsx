@@ -1,0 +1,55 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { Lightbulb, RefreshCw } from "lucide-react"
+import { useRandomFact } from '@/hooks/use-facts'
+import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
+
+export const Route = createFileRoute('/facts')({
+  component: FactsPage,
+})
+
+function FactsPage() {
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language || 'ru'
+  const { data, isLoading, refetch, isRefetching } = useRandomFact(lang)
+  const fact = data?.success ? data.data.result : null
+
+  useEffect(() => {
+    document.title = `${t('nav.facts')} | Apid`;
+  }, [t]);
+
+  return (
+    <div className="page-shell text-center max-w-3xl mx-auto">
+      <div>
+        <h1 className="page-title justify-center">
+          <Lightbulb className="page-title-icon" /> {t('facts.title')}
+        </h1>
+        <p className="page-subtitle mx-auto">{t('facts.subtitle')}</p>
+      </div>
+
+      <div className="relative group">
+        <div className={`content-card p-8 md:p-10 transition-all duration-500 ${isRefetching ? 'scale-[0.99] opacity-50' : 'scale-100 opacity-100'}`}>
+          {isLoading && !fact ? (
+            <div className="space-y-4 animate-pulse">
+              <div className="h-6 bg-secondary/50 rounded w-full"></div>
+              <div className="h-6 bg-secondary/50 rounded w-3/4 mx-auto"></div>
+            </div>
+          ) : (
+            <p className="text-xl md:text-2xl font-semibold leading-relaxed">
+              {typeof fact === 'object' ? fact?.content : fact}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <button 
+        onClick={() => refetch()}
+        disabled={isRefetching}
+        className="page-action active:scale-[0.98] mx-auto"
+      >
+        <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+        {isRefetching ? t('facts.thinking') : t('facts.next')}
+      </button>
+    </div>
+  )
+}

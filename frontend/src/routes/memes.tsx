@@ -1,0 +1,58 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { Image as ImageIcon, Shuffle } from "lucide-react"
+import { useRandomMeme } from '@/hooks/use-memes'
+import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
+
+export const Route = createFileRoute('/memes')({
+  component: MemesPage,
+})
+
+function MemesPage() {
+  const { data, isLoading, refetch, isRefetching } = useRandomMeme()
+  const { t } = useTranslation()
+  const meme = data?.success ? data.data.result : null
+
+  useEffect(() => {
+    document.title = `${t('nav.memes')} | Apid`;
+  }, [t]);
+
+  return (
+    <div className="page-shell max-w-2xl mx-auto">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">
+            <ImageIcon className="page-title-icon" /> {t('memes.title')}
+          </h1>
+          <p className="page-subtitle">{t('memes.subtitle')}</p>
+        </div>
+        <button 
+          onClick={() => refetch()}
+          disabled={isRefetching}
+          className="page-action active:scale-[0.98]"
+        >
+          <Shuffle className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          {isRefetching ? t('memes.loading') : t('memes.next')}
+        </button>
+      </div>
+
+      {isLoading && !meme ? (
+        <div className="aspect-square content-card animate-pulse" />
+      ) : meme && (
+        <div className={`space-y-5 transition-all duration-500 ${isRefetching ? 'opacity-50 scale-[0.99]' : 'opacity-100 scale-100'}`}>
+          <div className="content-card overflow-hidden flex items-center justify-center min-h-[300px]">
+            <img 
+              src={meme.image} 
+              alt={meme.description} 
+              className="w-full h-auto object-contain max-h-[50vh] md:max-h-[60vh] mx-auto animate-in fade-in zoom-in duration-500"
+              loading="lazy"
+            />
+          </div>
+          <div className="text-center">
+             <p className="text-lg md:text-xl font-semibold tracking-tight text-foreground/90">{meme.description}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

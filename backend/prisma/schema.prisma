@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Currency {
+  key            String   @id // "ton_to_usd", "usd_to_rub"
+  name           String // "TON/USD"
+  type           String // "crypto" или "fiat"
+  source         String // "coinbase", "cbr", "minfin", "wise"
+  baseCurrency   String // "TON", "USD"
+  targetCurrency String // "USD", "RUB"
+  symbol         String? // "💎", "₿", "$"
+  emoji          String? // "💎", "🇷🇺"
+  params         Json? // для source-специфичных настроек (slug и т.п.)
+  order          Int      @default(0)
+  enabled        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  rates Rate[]
+
+  @@unique([baseCurrency, targetCurrency]) // например, (USD, RUB) – только один курс
+}
+
+model Rate {
+  id          Int      @id @default(autoincrement())
+  currency    Currency @relation(fields: [currencyKey], references: [key])
+  currencyKey String
+  price       Decimal  @db.Decimal(20, 8)
+  diff        Decimal? @db.Decimal(20, 8)
+  diffPercent Decimal? @db.Decimal(10, 4)
+  direction   String?  // up, down, neutral
+  createdAt   DateTime @default(now())
+
+  @@index([currencyKey, createdAt])
+}
+
+model ParsingLog {
+  id        Int      @id @default(autoincrement())
+  status    String   // "success", "error", "warning"
+  source    String?  // e.g., "Coinbase", "CBR"
+  message   String   @db.Text
+  duration  Int?     // в мс
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model ApiRequestLog {
+  id        Int      @id @default(autoincrement())
+  ip        String
+  method    String
+  path      String
+  query     String?  @db.Text
+  body      String?  @db.Text
+  userAgent String?
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model BannedIp {
+  ip        String   @id
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+
+
+model News {
+  id              Int      @id @default(autoincrement())
+  title           String   @db.Text
+  description     String?  @db.Text
+  content         String?  @db.Text
+  url             String   @unique
+  source          String
+  sourceName      String
+  category        String?
+  imageUrl        String?
+  titleRu         String?  @db.Text
+  descriptionRu   String?  @db.Text
+  summary         String?  @db.Text
+  aiKey           String?  // AI-generated keywords for dedup
+  publishedAt     DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([source, publishedAt])
+}
+
+model SystemConfig {
+  key   String @id // e.g., "parser_cron"
+  value String // e.g., "*/30 * * * *"
+}
+
+model Holiday {
+  id          Int      @id @default(autoincrement())
+  name        String
+  date        DateTime
+  language    String   @default("ru") // "ru" или "uk"
+  description String?  @db.Text
+  type        String?  // "public", "observance"
+  
+  // Дополнительные данные в формате JSON
+  events      Json?    // Список праздников (строки)
+  signs       Json?    // Приметы
+  prohibitions Json?   // Запреты
+  history     Json?    // Исторические события
+  birthdays   Json?    // Дни рождения
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([date, language]) // Только одна запись на дату+язык
+}
+
+
+model Commodity {
+  id              Int             @id @default(autoincrement())
+  symbol          String          @unique // XAU, CL1, NG/USD, etc.
+  name            String          // Gold, Crude Oil, Natural Gas
+  nameRu          String?         // Золото, Нефть WTI
+  nameUa          String?         // Золото, Нафта WTI
+  category        String          // metals_precious, metals_base, energy, grains, softs, livestock, other
+  unit            String          // oz, lb, mt, bbl, bushel
+  exchange        String?         // COMEX, ICE, CBOT, LME, NYMEX
+  source          String          // investing
+  params          Json?           // investing slugs etc.
+  order           Int             @default(0)
+  enabled         Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  rates CommodityRate[]
+}
+
+model CommodityRate {
+  id              Int             @id @default(autoincrement())
+  commodity       Commodity       @relation(fields: [commodityId], references: [id])
+  commodityId     Int
+  price           Decimal         @db.Decimal(20, 4)
+  change24h       Decimal?        @db.Decimal(20, 4)
+  changePercent24h Decimal?       @db.Decimal(10, 4)
+  high24h         Decimal?        @db.Decimal(20, 4)
+  low24h          Decimal?        @db.Decimal(20, 4)
+  createdAt       DateTime        @default(now())
+
+  @@index([commodityId, createdAt])
+}
