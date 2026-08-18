@@ -2,14 +2,18 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import express from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import compression from 'compression'
+import type { ViteDevServer } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const isProduction = process.env.NODE_ENV === 'production'
-const port = process.env.PORT || 3001
+const port = Number(process.env.PORT) || 3001
 
-function parseCookies(cookieHeader) {
-  const cookies = {}
+type SupportedLanguage = 'uk' | 'ru'
+
+function parseCookies(cookieHeader?: string): Record<string, string> {
+  const cookies: Record<string, string> = {}
   if (!cookieHeader) return cookies
   for (const cookie of cookieHeader.split(';')) {
     const [name, ...rest] = cookie.trim().split('=')
@@ -20,15 +24,15 @@ function parseCookies(cookieHeader) {
   return cookies
 }
 
-function normalizeLanguage(value) {
-  if (!value) return null
-  const clean = String(value).toLowerCase().trim()
+function normalizeLanguage(value: unknown): SupportedLanguage | null {
+  if (!value || typeof value !== 'string') return null
+  const clean = value.toLowerCase().trim()
   if (clean.startsWith('ru')) return 'ru'
   if (clean.startsWith('uk') || clean.startsWith('ua')) return 'uk'
   return null
 }
 
-function parseAcceptLanguage(header) {
+function parseAcceptLanguage(header?: string): SupportedLanguage {
   if (!header) return 'uk'
   const preferences = header
     .split(',')
@@ -46,9 +50,9 @@ function parseAcceptLanguage(header) {
   return 'uk'
 }
 
-function resolveServerLanguage(req) {
+function resolveServerLanguage(req: Request): SupportedLanguage {
   // 1. ?hl= query param
-  if (req.query?.hl) {
+  if (req.query.hl) {
     const fromQuery = normalizeLanguage(req.query.hl)
     if (fromQuery) return fromQuery
   }
@@ -61,11 +65,20 @@ function resolveServerLanguage(req) {
   }
 
   // 3. Accept-Language header
-  if (req.headers['accept-language']) {
-    return parseAcceptLanguage(req.headers['accept-language'])
+  const acceptLang = req.headers['accept-language']
+  if (acceptLang) {
+    return parseAcceptLanguage(acceptLang)
   }
 
   return 'uk'
+}
+
+interface RenderResult {
+  appHtml: string
+  title: string
+  headTags: string
+  dehydratedState: unknown
+  lang: SupportedLanguage
 }
 
 async function createServer() {
@@ -73,7 +86,7 @@ async function createServer() {
 
   app.use(compression())
 
-  let vite
+  let vite: ViteDevServer | undefined
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite')
     vite = await createViteServer({
@@ -91,24 +104,24 @@ async function createServer() {
     )
   }
 
-  app.use(async (req, res, next) => {
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
     const url = req.originalUrl
 
     // Skip API, swagger, and static asset requests if any slipped through
     if (
       url.startsWith('/api/') ||
       url.startsWith('/swagger') ||
-      url.includes('.') && !url.includes('.html')
+      (url.includes('.') && !url.includes('.html'))
     ) {
       return next()
     }
 
     try {
       const lang = resolveServerLanguage(req)
-      let template
-      let render
+      let template: string
+      let render: (url: string, opts: { lang: SupportedLanguage }) => Promise<RenderResult>
 
-      if (!isProduction) {
+      if (!isProduction && vite) {
         template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8')
         template = await vite.transformIndexHtml(url, template)
         const entry = await vite.ssrLoadModule('/src/entry-server.tsx')
@@ -135,7 +148,7 @@ ${rendered.headTags || ''}`
   window.__INITIAL_LANG__ = ${JSON.stringify(rendered.lang)};
 </script>`
 
-      let html = template
+      const html = template
         .replace('<!--app-head-->', headHtml)
         .replace('<!--app-html-->', rendered.appHtml)
         .replace('<!--app-state-->', stateScript)
@@ -144,10 +157,10 @@ ${rendered.headTags || ''}`
       res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
     } catch (e) {
       if (!isProduction && vite) {
-        vite.ssrFixStacktrace(e)
+        vite.ssrFixStacktrace(e as Error)
       }
       console.error('SSR Render Error:', e)
-      
+
       // Fallback to client-side rendering template on render error
       try {
         const rawTemplate = fs.readFileSync(

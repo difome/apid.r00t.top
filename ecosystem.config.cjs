@@ -18,7 +18,8 @@ module.exports = {
     {
       name: 'apid-frontend',
       cwd: './frontend',
-      script: 'server.js',
+      script: 'node_modules/tsx/dist/cli.mjs',
+      args: 'server.ts',
       exec_mode: 'fork',
       instances: 1,
       autorestart: true,
