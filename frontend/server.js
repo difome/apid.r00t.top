@@ -91,7 +91,7 @@ async function createServer() {
     )
   }
 
-  app.use('*', async (req, res, next) => {
+  app.use(async (req, res, next) => {
     const url = req.originalUrl
 
     // Skip API, swagger, and static asset requests if any slipped through

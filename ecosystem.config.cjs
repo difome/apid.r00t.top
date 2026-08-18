@@ -3,7 +3,8 @@ module.exports = {
     {
       name: 'apid-backend',
       cwd: './backend',
-      script: 'dist/index.js',
+      script: 'node_modules/tsx/dist/cli.mjs',
+      args: 'src/index.ts',
       exec_mode: 'fork',
       instances: 1,
       autorestart: true,
