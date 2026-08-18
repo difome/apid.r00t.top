@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "rootDir": "src",
-    "ignoreDeprecations": "6.0",
     "target": "ES2023",
     "module": "ESNext",
     "esModuleInterop": true,

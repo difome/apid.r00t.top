@@ -165,7 +165,7 @@ function RootComponent() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="apid-theme">
       <LanguageProvider>
-        <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary flex flex-col justify-between overflow-x-hidden">
+        <div suppressHydrationWarning className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary flex flex-col justify-between overflow-x-hidden">
           <div className="w-full overflow-x-hidden">
             <Header />
 

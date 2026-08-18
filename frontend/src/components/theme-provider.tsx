@@ -18,16 +18,19 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undef
 export function ThemeProvider({
   children,
   defaultTheme = 'dark',
-  storageKey = 'vite-ui-theme',
+  storageKey = 'apid-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      const stored = localStorage.getItem(storageKey)
-      return (stored as Theme | null) ?? defaultTheme
-    }
-    return defaultTheme
-  })
+  const [theme, setTheme] = useState<Theme>(defaultTheme)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey) as Theme | null
+      if (stored) {
+        setTheme(stored)
+      }
+    } catch {}
+  }, [storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
