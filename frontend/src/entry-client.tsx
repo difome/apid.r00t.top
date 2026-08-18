@@ -43,7 +43,14 @@ void router.load().then(() => {
       rootElement,
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-      </QueryClientProvider>
+      </QueryClientProvider>,
+      {
+        onRecoverableError(error) {
+          if (import.meta.env.DEV) {
+            console.warn('Recoverable hydration mismatch:', error)
+          }
+        },
+      }
     )
   } else {
     const root = ReactDOM.createRoot(rootElement)
