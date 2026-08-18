@@ -154,7 +154,10 @@ ${rendered.headTags || ''}`
         .replace('<!--app-state-->', stateScript)
         .replace('<html lang="uk"', `<html lang="${rendered.lang}"`)
 
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+      res.status(200).set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      }).end(html)
     } catch (e) {
       if (!isProduction && vite) {
         vite.ssrFixStacktrace(e as Error)
