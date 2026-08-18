@@ -1,22 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Lightbulb, RefreshCw } from "lucide-react"
-import { useRandomFact } from '@/hooks/use-facts'
+import { useRandomFact, factsQueryOptions } from '@/features/facts'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/facts')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(factsQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('nav.facts'),
+    description: i18n.t('facts.subtitle'),
+    path: '/facts',
+  }),
   component: FactsPage,
 })
 
 function FactsPage() {
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language || 'ru'
-  const { data, isLoading, refetch, isRefetching } = useRandomFact(lang)
+  const { t } = useTranslation()
+  const { data, isLoading, refetch, isRefetching } = useRandomFact()
   const fact = data?.success ? data.data.result : null
-
-  useEffect(() => {
-    document.title = `${t('nav.facts')} | Apid`;
-  }, [t]);
 
   return (
     <div className="page-shell text-center max-w-3xl mx-auto">

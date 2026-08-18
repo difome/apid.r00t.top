@@ -1,18 +1,27 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar as CalendarIcon, Tag, History, Cake, Star, ShieldAlert } from "lucide-react"
-import { useHolidays } from '@/hooks/use-holidays'
+import { useHolidays, holidaysQueryOptions } from '@/features/holidays'
 import { useLanguage } from '@/hooks/use-language'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/holidays')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(holidaysQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('nav.holidays'),
+    description: i18n.t('holidays.subtitle'),
+    path: '/holidays',
+  }),
   component: HolidaysPage,
 })
 
 function HolidaysPage() {
   const { lang } = useLanguage()
   const { t } = useTranslation()
-  const { data, isLoading, isRefetching } = useHolidays(lang)
+  const { data, isLoading, isRefetching } = useHolidays()
   
   const isSuccess = data?.status === 'success'
   const holidays = isSuccess && data.holidays ? data.holidays : []
@@ -22,10 +31,6 @@ function HolidaysPage() {
   const prohibitions = isSuccess && data.prohibitions ? data.prohibitions : []
 
   const formattedDate = isSuccess && data.date_formatted ? data.date_formatted : '...'
-
-  useEffect(() => {
-    document.title = `${t('nav.holidays')} ${formattedDate !== '...' ? `(${formattedDate})` : ''} | Apid`;
-  }, [t, formattedDate]);
   const shortDate = formattedDate.split(' ').slice(0, 2).join(' ').toLowerCase()
 
   return (
@@ -58,149 +63,135 @@ function HolidaysPage() {
              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto opacity-70">
                <CalendarIcon className="w-12 h-12" />
             </div>
-             <p className="text-muted-foreground font-semibold text-sm">{t('holidays.noHolidaysTitle')}</p>
-            <p className="text-base text-muted-foreground/60">{t('holidays.noHolidaysDesc')}</p>
+            <h3 className="text-xl font-bold text-foreground">{t('holidays.noHolidaysTitle')}</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">{t('holidays.noHolidaysDesc')}</p>
           </div>
         ) : (
-          <div className="space-y-8 w-full max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
-              {/* Левая колонка - основная информация (Какой день, События, Именины) */}
-              <div className="lg:col-span-2 space-y-8 flex flex-col">
-                
-                {/* Какой день */}
-                {data.description && (
-                   <div className="content-card overflow-hidden">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <Tag className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.today', { date: shortDate })}</h2>
-                    </div>
-                    <div className="p-5 space-y-4 text-muted-foreground leading-relaxed text-base">
-                      {data.description.split('\n\n').map((pText: string, idx: number) => (
-                        <p key={idx}>{pText}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
+            {/* Left Big Column */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Holidays Section */}
+              <div className="content-card p-6 md:p-8 space-y-6">
+                <div className="flex items-center gap-3 border-b border-border pb-4">
+                  <Tag className="w-5 h-5 text-primary" />
+                  <h2 className="text-xl font-bold tracking-tight text-foreground">
+                    {t('holidays.allHolidays', { date: shortDate })}
+                  </h2>
+                </div>
 
-                {/* Historical Events */}
-                {historicalEvents.length > 0 && (
-                  <div className="content-card overflow-hidden">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <History className="w-4 h-4 text-muted-foreground" />
+                <div className="grid gap-3">
+                  {holidays.map((h, i) => (
+                    <div 
+                      key={i} 
+                      className="p-4 rounded-xl border border-border/80 bg-background/50 hover:bg-secondary/30 transition-colors flex items-start gap-3.5 group"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-primary mt-2 group-hover:scale-125 transition-transform" />
+                      <div className="flex-1 space-y-1">
+                        <span className="font-semibold text-foreground text-base tracking-tight block">
+                          {h.title}
+                        </span>
+                        {h.description && (
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {h.description}
+                          </p>
+                        )}
                       </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.history')}</h2>
                     </div>
-                    <div className="divide-y divide-border p-2">
-                      {historicalEvents.map((h: any, idx: number) => (
-                        <div key={idx} className="px-6 py-4 hover:bg-blue-500/5 transition-colors group flex gap-5 rounded-xl">
-                          <div className="font-semibold text-foreground text-base w-16 flex-shrink-0 pt-0.5">{h.year}</div>
-                          <div className="text-muted-foreground group-hover:text-foreground transition-colors leading-snug">{h.description}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Birthdays */}
-                {birthdays.length > 0 && (
-                  <div className="content-card overflow-hidden">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <Cake className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.birthdays')}</h2>
-                    </div>
-                    <div className="divide-y divide-border p-2">
-                      {birthdays.map((b: any, idx: number) => (
-                        <div key={idx} className="px-6 py-4 hover:bg-pink-500/5 transition-colors group flex gap-5 rounded-xl">
-                          <div className="font-semibold text-foreground text-base w-16 flex-shrink-0 pt-0.5">{b.year}</div>
-                          <div className="text-muted-foreground group-hover:text-foreground transition-colors leading-snug">{b.description}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
+                  ))}
+                </div>
               </div>
 
-              {/* Правая колонка - сайдбар (Все праздники) */}
-              <div className="lg:col-span-1 space-y-8 flex flex-col">
-
-                {/* Все праздники */}
-                {holidays.length > 0 && (
-                  <div className="content-card overflow-hidden h-full flex flex-col">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <Tag className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.allHolidays', { date: shortDate })}</h2>
-                    </div>
-                    <div className="divide-y divide-border p-2 overflow-y-auto flex-1 custom-scrollbar max-h-[600px] lg:max-h-none">
-                      {holidays.map((h: any, idx: number) => (
-                        <div key={idx} className="px-6 py-4 hover:bg-primary/5 transition-colors group rounded-xl">
-                           <div className="font-medium text-base leading-tight group-hover:text-foreground transition-colors">{h.name}</div>
-                        </div>
-                      ))}
-                    </div>
+              {/* Historical Events */}
+              {historicalEvents.length > 0 && (
+                <div className="content-card p-6 md:p-8 space-y-6">
+                  <div className="flex items-center gap-3 border-b border-border pb-4">
+                    <History className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-xl font-bold tracking-tight text-foreground">{t('holidays.history')}</h2>
                   </div>
-                )}
 
-              </div>
-
+                  <div className="relative border-l-2 border-border/60 ml-3 pl-5 space-y-6">
+                    {historicalEvents.map((e, i) => (
+                      <div key={i} className="relative group">
+                        <div className="absolute -left-[27px] top-1.5 w-3 h-3 rounded-full border-2 border-background bg-indigo-500 group-hover:scale-125 transition-transform" />
+                        <div className="space-y-1">
+                          <span className="font-mono text-sm font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 inline-block mb-1">
+                            {e.year}
+                          </span>
+                          <p className="text-sm text-foreground/90 leading-relaxed">{e.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Нижняя секция - приметы и запреты в два блока под низом */}
-            {(signs.length > 0 || prohibitions.length > 0) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                
-                {/* Signs */}
-                {signs.length > 0 && (
-                  <div className="content-card overflow-hidden">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <Star className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.signs', { date: shortDate })}</h2>
-                    </div>
-                    <div className="divide-y divide-border p-2">
-                      {signs.map((s: any, idx: number) => (
-                        <div key={idx} className="px-6 py-4 hover:bg-yellow-500/5 transition-colors group rounded-xl">
-                          <div className="text-muted-foreground group-hover:text-foreground transition-colors leading-snug text-sm md:text-base">{s.text}</div>
-                        </div>
-                      ))}
-                    </div>
+            {/* Right Column */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Signs */}
+              {signs.length > 0 && (
+                <div className="content-card p-6 space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-border pb-3">
+                    <Star className="w-4 h-4 text-amber-500" />
+                    <h3 className="font-bold text-foreground text-sm tracking-tight uppercase">
+                      {t('holidays.signs', { date: shortDate })}
+                    </h3>
                   </div>
-                )}
+                  <ul className="space-y-2.5">
+                    {signs.map((s, i) => (
+                      <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                        <span className="text-amber-500 font-bold">•</span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-                {/* Prohibitions */}
-                {prohibitions.length > 0 && (
-                  <div className="content-card overflow-hidden">
-                    <div className="bg-secondary/40 px-5 py-4 border-b border-border flex items-center gap-3">
-                      <div className="p-2 bg-card rounded-lg border border-border">
-                        <ShieldAlert className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <h2 className="text-base font-semibold tracking-tight text-foreground">{t('holidays.prohibitions', { date: shortDate })}</h2>
-                    </div>
-                    <div className="divide-y divide-border p-2">
-                      {prohibitions.map((p: any, idx: number) => (
-                        <div key={idx} className="px-6 py-4 hover:bg-red-500/5 transition-colors group rounded-xl">
-                          <div className="text-muted-foreground group-hover:text-foreground transition-colors leading-snug text-sm md:text-base">{p.text}</div>
-                        </div>
-                      ))}
-                    </div>
+              {/* Prohibitions */}
+              {prohibitions.length > 0 && (
+                <div className="content-card p-6 space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-border pb-3">
+                    <ShieldAlert className="w-4 h-4 text-rose-500" />
+                    <h3 className="font-bold text-foreground text-sm tracking-tight uppercase">
+                      {t('holidays.prohibitions', { date: shortDate })}
+                    </h3>
                   </div>
-                )}
+                  <ul className="space-y-2.5">
+                    {prohibitions.map((p, i) => (
+                      <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                        <span className="text-rose-500 font-bold">•</span>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              </div>
-            )}
+              {/* Birthdays */}
+              {birthdays.length > 0 && (
+                <div className="content-card p-6 space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-border pb-3">
+                    <Cake className="w-4 h-4 text-emerald-500" />
+                    <h3 className="font-bold text-foreground text-sm tracking-tight uppercase">{t('holidays.birthdays')}</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {birthdays.map((b, i) => (
+                      <div key={i} className="text-xs space-y-0.5">
+                        <div className="flex items-baseline justify-between">
+                          <span className="font-semibold text-foreground">{b.name}</span>
+                          <span className="text-[10px] font-mono text-muted-foreground">{b.year}</span>
+                        </div>
+                        {b.description && <p className="text-muted-foreground text-[11px]">{b.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
     </div>
   )
 }
-

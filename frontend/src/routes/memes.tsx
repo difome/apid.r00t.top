@@ -1,10 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Image as ImageIcon, Shuffle } from "lucide-react"
-import { useRandomMeme } from '@/hooks/use-memes'
+import { useRandomMeme, memesQueryOptions } from '@/features/memes'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/memes')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(memesQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('nav.memes'),
+    description: i18n.t('memes.subtitle'),
+    path: '/memes',
+  }),
   component: MemesPage,
 })
 
@@ -12,10 +21,6 @@ function MemesPage() {
   const { data, isLoading, refetch, isRefetching } = useRandomMeme()
   const { t } = useTranslation()
   const meme = data?.success ? data.data.result : null
-
-  useEffect(() => {
-    document.title = `${t('nav.memes')} | Apid`;
-  }, [t]);
 
   return (
     <div className="page-shell max-w-2xl mx-auto">

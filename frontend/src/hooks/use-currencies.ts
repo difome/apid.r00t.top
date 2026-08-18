@@ -1,18 +1,21 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, fetchCurrencies, fetchHistory, fetchAvailableYears } from '@/lib/api'
 import type { CurrencyMeta } from '@/types/currency'
 import { useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+export const currenciesQueryOptions = () =>
+  queryOptions({
+    queryKey: ['currencies'],
+    queryFn: fetchCurrencies,
+    staleTime: Infinity,
+  })
+
 export function useCurrencies() {
   const queryClient = useQueryClient()
   const { t, i18n } = useTranslation()
  
-  const query = useQuery({
-    queryKey: ['currencies'],
-    queryFn: fetchCurrencies,
-    staleTime: Infinity, // Rely on SSE for updates
-  })
+  const query = useQuery(currenciesQueryOptions())
  
   useEffect(() => {
     let eventSource: EventSource | null = null

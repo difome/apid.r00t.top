@@ -7,7 +7,16 @@ import { Input } from '@/components/ui/input'
 import { Activity, Ban, Coins, Database, Lock, RefreshCcw, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
+
 export const Route = createFileRoute('/admin')({
+  head: () => createSeoHead({
+    title: i18n.t('admin.title'),
+    description: i18n.t('admin.description'),
+    path: '/admin',
+    noindex: true,
+  }),
   component: AdminPage,
 })
 
@@ -17,8 +26,12 @@ function AdminPage() {
   }, [])
 
   const queryClient = useQueryClient()
-  const { pathname } = useLocation()
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('admin_key'))
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      return !!localStorage.getItem('admin_key')
+    }
+    return false
+  })
   const [adminKeyInput, setAdminKeyInput] = useState('')
 
   useEffect(() => {

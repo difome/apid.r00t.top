@@ -1,28 +1,30 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LanguageProvider } from '@/hooks/use-language'
 import { useTranslation } from 'react-i18next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import type { QueryClient } from '@tanstack/react-query'
 
 import '../globals.css'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error: any) => error?.response?.status !== 401 && failureCount < 1,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-})
+export interface RouterContext {
+  queryClient: QueryClient
+  lang?: string
+}
 
-export const Route = createRootRoute({
-  component: RootComponent
+export const Route = createRootRouteWithContext<RouterContext>()({
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'Apid - Финансовые данные, курсы валют, котировки и медиа' },
+      { name: 'description', content: 'Сервис данных API: курсы валют, металлы, сырье, фильмы, мемы, факты, праздники.' },
+    ],
+  }),
+  component: RootComponent,
 })
 
 function Header() {
@@ -163,21 +165,19 @@ function RootComponent() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="apid-theme">
       <LanguageProvider>
-        <QueryClientProvider client={queryClient}>
-          <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary flex flex-col justify-between overflow-x-hidden">
-            <div className="w-full overflow-x-hidden">
-              <Header />
+        <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary flex flex-col justify-between overflow-x-hidden">
+          <div className="w-full overflow-x-hidden">
+            <Header />
 
-              <main className="max-w-6xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-10 w-full overflow-x-hidden">
-                <Outlet />
-              </main>
-            </div>
-
-            <Footer />
-
-            <TanStackRouterDevtools />
+            <main className="max-w-6xl mx-auto px-4 pt-24 pb-8 md:pt-28 md:pb-10 w-full overflow-x-hidden">
+              <Outlet />
+            </main>
           </div>
-        </QueryClientProvider>
+
+          <Footer />
+
+          {import.meta.env.DEV && typeof window !== 'undefined' && <TanStackRouterDevtools />}
+        </div>
       </LanguageProvider>
     </ThemeProvider>
   )

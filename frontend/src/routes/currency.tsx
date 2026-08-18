@@ -1,13 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo, useEffect } from 'react'
-import { useCurrencies } from '@/hooks/use-currencies'
-import { CurrencyConverter } from '@/components/currency/CurrencyConverter'
-import { MarketOverview } from '@/components/currency/MarketOverview'
-import { HistoryChart } from '@/components/currency/HistoryChart'
+import {
+  useCurrencies,
+  currenciesQueryOptions,
+  CurrencyConverter,
+  MarketOverview,
+  HistoryChart,
+} from '@/features/currency'
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from 'react-i18next'
 
+import { createSeoHead } from '@/lib/seo'
+
 export const Route = createFileRoute('/currency')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(currenciesQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('nav.currency'),
+    description: i18n.t('currency.subtitle'),
+    path: '/currency',
+  }),
   component: CurrencyPage,
 })
 

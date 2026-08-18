@@ -1,22 +1,30 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { CommodityMarketPage } from '@/components/market/CommodityMarketPage'
-import { useMetals } from '@/hooks/use-metals'
+import { CommodityMarketPage, useMetals, metalsQueryOptions } from '@/features/market'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/metals')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(metalsQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('metals.pageTitle'),
+    description: i18n.t('metals.description'),
+    path: '/metals',
+  }),
   component: MetalsPage,
 })
 
 function MetalsPage() {
-  const { i18n } = useTranslation()
-  const lang = i18n.language || 'ru'
+  const { t } = useTranslation()
 
   return (
     <CommodityMarketPage
       useData={useMetals}
-      title={lang === 'uk' ? 'Дрогоцінні та промислові метали' : 'Драгоценные и промышленные металлы'}
-      subtitle={lang === 'uk' ? 'Котирування дорогоцінних та промислових металів' : 'Котировки драгоценных и промышленных металлов'}
-      documentTitle={lang === 'uk' ? 'Метали' : 'Металлы'}
+      title={t('metals.title')}
+      subtitle={t('metals.subtitle')}
+      documentTitle={t('metals.pageTitle')}
     />
   )
 }

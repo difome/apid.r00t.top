@@ -1,23 +1,25 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Calendar, CircleDollarSign, Film, Gem, Image, Lightbulb, Package } from 'lucide-react'
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/')({
+  head: () => createSeoHead({
+    title: `${i18n.t('home.title1')} ${i18n.t('home.title2')}`,
+    description: i18n.t('home.subtitle'),
+    path: '/',
+  }),
   component: Index,
 })
 
 function Index() {
   const { t } = useTranslation()
 
-  useEffect(() => {
-    document.title = `Apid | ${t('home.title1')} ${t('home.title2')}`
-  }, [t])
-
   const modules = [
     { title: t('nav.currency'), description: t('home.currencyDesc'), icon: CircleDollarSign, link: '/currency' },
-    { title: t('nav.metals', 'Металлы'), description: t('home.metalsDesc', 'Драгоценные металлы'), icon: Gem, link: '/metals' },
-    { title: t('nav.commodities', 'Сырье'), description: t('home.commoditiesDesc', 'Сырьевые товары'), icon: Package, link: '/commodities' },
+    { title: t('nav.metals'), description: t('home.metalsDesc'), icon: Gem, link: '/metals' },
+    { title: t('nav.commodities'), description: t('home.commoditiesDesc'), icon: Package, link: '/commodities' },
     { title: t('nav.movies'), description: t('home.moviesDesc'), icon: Film, link: '/movies' },
     { title: t('nav.memes'), description: t('home.memesDesc'), icon: Image, link: '/memes' },
     { title: t('nav.holidays'), description: t('home.holidaysDesc'), icon: Calendar, link: '/holidays' },
@@ -31,7 +33,7 @@ function Index() {
           {t('home.title1')} {t('home.title2')}
         </h1>
         <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-          {t('home.subtitle')}. Курси валют, ринкові дані, медіа та довідники в одному місці.
+          {t('home.subtitle')}.
         </p>
       </section>
 

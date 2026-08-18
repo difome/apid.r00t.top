@@ -1,19 +1,27 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import type { QueryClient } from '@tanstack/react-query'
+import type { Language } from './i18n'
 
-export function getRouter() {
-  const router = createTanStackRouter({
+export interface RouterContext {
+  queryClient: QueryClient
+  lang: Language
+}
+
+export function createAppRouter(queryClient: QueryClient, lang: Language = 'uk') {
+  return createTanStackRouter({
     routeTree,
-    scrollRestoration: true,
+    context: {
+      queryClient,
+      lang,
+    },
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    scrollRestoration: true,
   })
-
-  return router
 }
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof getRouter>
+    router: ReturnType<typeof createAppRouter>
   }
 }

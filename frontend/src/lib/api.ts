@@ -2,17 +2,42 @@ import axios from 'axios'
 import type { CommodityApiItem, HistoryResponse, ListResponse } from '@/types/market'
 import type { ApiResponse, CurrencyData } from '@/types/currency'
 
+import i18n from '@/i18n'
+
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return import.meta.env.VITE_API_URL || '/api/v2'
+  }
+  return (
+    process.env.INTERNAL_API_URL ||
+    process.env.VITE_API_URL ||
+    'http://127.0.0.1:3000/api/v2'
+  )
+}
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v2',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
 api.interceptors.request.use((config) => {
-  const key = localStorage.getItem('admin_key')
-  if (key) {
-    config.headers['x-admin-key'] = key
+  const currentLang = i18n.language || 'uk'
+  config.headers['Accept-Language'] = currentLang
+
+  if (!config.params) {
+    config.params = {}
+  }
+  if (!config.params.lang) {
+    config.params.lang = currentLang
+  }
+
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    const key = localStorage.getItem('admin_key')
+    if (key) {
+      config.headers['x-admin-key'] = key
+    }
   }
   return config
 })
@@ -20,12 +45,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const url = error.config?.url || ''
-    const isAdminRequest = url.startsWith('/admin') || url.includes('/sync')
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const url = error.config?.url || ''
+      const isAdminRequest = url.startsWith('/admin') || url.includes('/sync')
 
-    if (error.response?.status === 401 && isAdminRequest) {
-      localStorage.removeItem('admin_key')
-      window.dispatchEvent(new Event('admin-auth-error'))
+      if (error.response?.status === 401 && isAdminRequest) {
+        localStorage.removeItem('admin_key')
+        window.dispatchEvent(new Event('admin-auth-error'))
+      }
     }
 
     return Promise.reject(error)

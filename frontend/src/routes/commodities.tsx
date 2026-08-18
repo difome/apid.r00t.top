@@ -1,22 +1,30 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { CommodityMarketPage } from '@/components/market/CommodityMarketPage'
-import { useCommodities } from '@/hooks/use-commodities'
+import { CommodityMarketPage, useCommodities, commoditiesQueryOptions } from '@/features/market'
+import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/commodities')({
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(commoditiesQueryOptions())
+  },
+  head: () => createSeoHead({
+    title: i18n.t('commodities.pageTitle'),
+    description: i18n.t('commodities.description'),
+    path: '/commodities',
+  }),
   component: CommoditiesPage,
 })
 
 function CommoditiesPage() {
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language || 'ru'
+  const { t } = useTranslation()
 
   return (
     <CommodityMarketPage
       useData={useCommodities}
-      title={lang === 'uk' ? 'Сировинні товари' : 'Сырьевые товары'}
-      subtitle={lang === 'uk' ? 'Котирування сировинних товарів' : 'Котировки сырьевых товаров'}
-      documentTitle={t('nav.commodities', 'Сырьевые товары')}
+      title={t('commodities.title')}
+      subtitle={t('commodities.subtitle')}
+      documentTitle={t('commodities.pageTitle')}
     />
   )
 }
