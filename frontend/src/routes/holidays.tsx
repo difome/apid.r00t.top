@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Calendar as CalendarIcon, Tag, History, Cake, Star, ShieldAlert } from "lucide-react"
+import { Calendar as CalendarIcon, Tag, History, Cake, Star, ShieldAlert } from 'lucide-react'
 import { useHolidays, holidaysQueryOptions } from '@/features/holidays'
-import { useLanguage } from '@/hooks/use-language'
 import { useTranslation } from 'react-i18next'
 import { createSeoHead } from '@/lib/seo'
 import i18n from '@/i18n'
@@ -10,28 +9,38 @@ export const Route = createFileRoute('/holidays')({
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(holidaysQueryOptions())
   },
-  head: () => createSeoHead({
-    title: i18n.t('nav.holidays'),
-    description: i18n.t('holidays.subtitle'),
-    path: '/holidays',
-  }),
+  head: () =>
+    createSeoHead({
+      title: i18n.t('nav.holidays'),
+      description: i18n.t('holidays.subtitle'),
+      path: '/holidays',
+    }),
   component: HolidaysPage,
 })
 
+function getText(item: unknown): string {
+  if (!item) return ''
+  if (typeof item === 'string') return item
+  if (typeof item === 'object' && 'text' in item) {
+    const textVal = (item as { text?: unknown }).text
+    return typeof textVal === 'string' ? textVal : ''
+  }
+  return ''
+}
+
 function HolidaysPage() {
-  const { lang } = useLanguage()
   const { t } = useTranslation()
   const { data, isLoading, isRefetching } = useHolidays()
-  
-  const isSuccess = data?.status === 'success'
-  const holidays = isSuccess && data.holidays ? data.holidays : []
-  const historicalEvents = isSuccess && data.historical_events ? data.historical_events : []
-  const birthdays = isSuccess && data.birthdays ? data.birthdays : []
-  const signs = isSuccess && data.signs ? data.signs : []
-  const prohibitions = isSuccess && data.prohibitions ? data.prohibitions : []
 
-  const formattedDate = isSuccess && data.date_formatted ? data.date_formatted : '...'
-  const shortDate = formattedDate.split(' ').slice(0, 2).join(' ').toLowerCase()
+  const isSuccess = data?.status === 'success' || (data && Array.isArray(data.holidays))
+  const holidays = data?.holidays ?? []
+  const historicalEvents = data?.historical_events ?? []
+  const birthdays = data?.birthdays ?? []
+  const signs = data?.signs ?? []
+  const prohibitions = data?.prohibitions ?? []
+
+  const formattedDate = data?.date_formatted || ''
+  const shortDate = formattedDate ? formattedDate.split(' ').slice(0, 2).join(' ').toLowerCase() : ''
 
   return (
     <div className="page-shell">
@@ -47,21 +56,21 @@ function HolidaysPage() {
       <div className={`transition-all duration-500 ${isRefetching ? 'opacity-50 grayscale' : 'opacity-100 grayscale-0'}`}>
         {isLoading ? (
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
-             <div className="lg:col-span-2 space-y-8">
-               {[1,2].map(i => (
-                   <div key={i} className="h-64 content-card animate-pulse" />
-               ))}
-             </div>
-             <div className="lg:col-span-1 space-y-8">
-               {[1,2].map(i => (
-                   <div key={i} className="h-64 content-card animate-pulse" />
-               ))}
-             </div>
+            <div className="lg:col-span-2 space-y-8">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-64 content-card animate-pulse" />
+              ))}
+            </div>
+            <div className="lg:col-span-1 space-y-8">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-64 content-card animate-pulse" />
+              ))}
+            </div>
           </div>
         ) : !isSuccess ? (
-           <div className="content-card p-10 md:p-14 text-center space-y-4">
-             <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto opacity-70">
-               <CalendarIcon className="w-12 h-12" />
+          <div className="content-card p-10 md:p-14 text-center space-y-4">
+            <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto opacity-70">
+              <CalendarIcon className="w-12 h-12" />
             </div>
             <h3 className="text-xl font-bold text-foreground">{t('holidays.noHolidaysTitle')}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">{t('holidays.noHolidaysDesc')}</p>
@@ -80,24 +89,27 @@ function HolidaysPage() {
                 </div>
 
                 <div className="grid gap-3">
-                  {holidays.map((h, i) => (
-                    <div 
-                      key={i} 
-                      className="p-4 rounded-xl border border-border/80 bg-background/50 hover:bg-secondary/30 transition-colors flex items-start gap-3.5 group"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2 group-hover:scale-125 transition-transform" />
-                      <div className="flex-1 space-y-1">
-                        <span className="font-semibold text-foreground text-base tracking-tight block">
-                          {h.title}
-                        </span>
-                        {h.description && (
-                          <p className="text-sm text-muted-foreground leading-relaxed">
-                            {h.description}
-                          </p>
-                        )}
+                  {holidays.map((h, i) => {
+                    const title = h.title || h.name || ''
+                    return (
+                      <div
+                        key={i}
+                        className="p-4 rounded-xl border border-border/80 bg-background/50 hover:bg-secondary/30 transition-colors flex items-start gap-3.5 group"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-primary mt-2 group-hover:scale-125 transition-transform" />
+                        <div className="flex-1 space-y-1">
+                          <span className="font-semibold text-foreground text-base tracking-tight block">
+                            {title}
+                          </span>
+                          {h.description && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {h.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 
@@ -138,12 +150,16 @@ function HolidaysPage() {
                     </h3>
                   </div>
                   <ul className="space-y-2.5">
-                    {signs.map((s, i) => (
-                      <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
-                        <span className="text-amber-500 font-bold">•</span>
-                        <span>{s}</span>
-                      </li>
-                    ))}
+                    {signs.map((s, i) => {
+                      const text = getText(s)
+                      if (!text) return null
+                      return (
+                        <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span>{text}</span>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               )}
@@ -158,12 +174,16 @@ function HolidaysPage() {
                     </h3>
                   </div>
                   <ul className="space-y-2.5">
-                    {prohibitions.map((p, i) => (
-                      <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
-                        <span className="text-rose-500 font-bold">•</span>
-                        <span>{p}</span>
-                      </li>
-                    ))}
+                    {prohibitions.map((p, i) => {
+                      const text = getText(p)
+                      if (!text) return null
+                      return (
+                        <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span>{text}</span>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               )}
@@ -176,15 +196,19 @@ function HolidaysPage() {
                     <h3 className="font-bold text-foreground text-sm tracking-tight uppercase">{t('holidays.birthdays')}</h3>
                   </div>
                   <div className="space-y-3">
-                    {birthdays.map((b, i) => (
-                      <div key={i} className="text-xs space-y-0.5">
-                        <div className="flex items-baseline justify-between">
-                          <span className="font-semibold text-foreground">{b.name}</span>
-                          <span className="text-[10px] font-mono text-muted-foreground">{b.year}</span>
+                    {birthdays.map((b, i) => {
+                      const name = b.name || b.description || ''
+                      const desc = b.name && b.description ? b.description : undefined
+                      return (
+                        <div key={i} className="text-xs space-y-0.5">
+                          <div className="flex items-baseline justify-between">
+                            <span className="font-semibold text-foreground">{name}</span>
+                            <span className="text-[10px] font-mono text-muted-foreground">{b.year}</span>
+                          </div>
+                          {desc && <p className="text-muted-foreground text-[11px]">{desc}</p>}
                         </div>
-                        {b.description && <p className="text-muted-foreground text-[11px]">{b.description}</p>}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}

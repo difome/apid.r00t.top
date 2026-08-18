@@ -33,7 +33,7 @@ const periods = [
 
 export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect, showTabs = true, defaultTab = 'all' }: MarketOverviewProps) {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language || 'ru'
+  const lang = i18n.language === 'ru' ? 'ru' : 'uk'
 
   const [activeTab, setActiveTab] = useState<'all' | 'fiat' | 'crypto' | 'commodity'>(defaultTab)
   const [displayCurrency, setDisplayCurrency] = useState('USD')
@@ -100,7 +100,7 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
   };
 
   const getTabLabel = (tab: string) => {
-    const l = lang === 'uk' ? 'uk' : lang === 'en' ? 'en' : 'ru';
+    const l = lang === 'uk' ? 'uk' : 'ru';
     return tabLabels[tab][l] || tabLabels[tab]['ru'];
   };
 
@@ -148,7 +148,7 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={lang === 'uk' ? 'Пошук активів...' : lang === 'ru' ? 'Поиск активов...' : 'Search assets...'}
+              placeholder={lang === 'uk' ? 'Пошук активів...' : 'Поиск активов...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 bg-card border-border text-sm font-medium rounded-lg h-9"
@@ -178,7 +178,9 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
               </div>
               <div className="px-0.5">
                 {availableDisplayCurrencies.filter(c => (c || '').toLowerCase().includes(currencyPickerSearch.toLowerCase())).map(curr => {
-                  const meta = symbolsMap[curr];
+                  const meta = symbolsMap[curr] as CurrencyMeta | undefined;
+                  const emoji = meta?.emoji || curr.substring(0, 2);
+                  const name = meta?.name || curr;
                   return (
                     <SelectItem 
                       key={curr} 
@@ -187,10 +189,10 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="bg-secondary w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                          {meta.emoji || curr.substring(0, 2)}
+                          {emoji}
                         </div>
                         <div className="flex flex-col text-left justify-center">
-                          <span className="font-medium text-sm text-foreground leading-tight">{meta.name || curr}</span>
+                          <span className="font-medium text-sm text-foreground leading-tight">{name}</span>
                           <span className="text-[10px] text-muted-foreground font-semibold leading-none mt-[1px]">{curr}</span>
                         </div>
                       </div>
@@ -300,7 +302,7 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
                   <td className="px-4 py-3 text-right">
                     <div className="flex flex-col items-end">
                       <span className="text-sm font-semibold tracking-tight text-foreground flex items-center justify-end">
-                        <span className="text-muted-foreground font-medium text-xs mr-1">{symbolsMap[displayCurrency].symbol || displayCurrency}</span>
+                        <span className="text-muted-foreground font-medium text-xs mr-1">{(symbolsMap as Record<string, CurrencyMeta | undefined>)[displayCurrency]?.symbol || displayCurrency}</span>
                         {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                       </span>
                     </div>

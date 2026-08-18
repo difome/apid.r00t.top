@@ -1,8 +1,8 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-import { useState  } from "react"
-import type {ReactNode} from "react";
+import { useState } from "react"
+import type { ReactNode } from "react"
 import type { CurrencyMeta } from "@/types/currency"
 
 interface CurrencySelectorProps {
@@ -48,34 +48,35 @@ export function CurrencySelector({
         </div>
         
         <div className="max-h-[350px] overflow-y-auto p-1 custom-scrollbar">
-           {filteredCurrencies.map(([code, meta]) => (
-             <button
-               key={code}
-               onClick={() => {
-                 onSelect(code)
-                 setOpen(false)
-               }}
-               className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all group mb-0.5 will-change-transform ${
-                  selectedCode === code ? 'bg-secondary' : 'hover:bg-secondary/60'
-               }`}
-             >
-               <div className="flex items-center gap-3">
-                   <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-base group-hover:scale-105 transition-transform">
-                     {meta.emoji}
-                  </div>
-                  <div className="text-left">
-                     <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{meta.name}</p>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{code}</p>
-                  </div>
-               </div>
-               {selectedCode === code && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mr-2" />
-               )}
-             </button>
-           ))}
-           {filteredCurrencies.length === 0 && (
-             <div className="p-8 text-center text-muted-foreground text-sm italic">Не знайдено.</div>
-           )}
+          {filteredCurrencies.map(([code, meta]) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => {
+                onSelect(code)
+                setOpen(false)
+              }}
+              className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all group mb-0.5 will-change-transform ${
+                selectedCode === code ? 'bg-secondary' : 'hover:bg-secondary/60'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-base group-hover:scale-105 transition-transform">
+                  {meta.emoji || code.substring(0, 2)}
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{meta.name || code}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{code}</p>
+                </div>
+              </div>
+              {selectedCode === code && (
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mr-2" />
+              )}
+            </button>
+          ))}
+          {filteredCurrencies.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground text-sm italic">Не знайдено.</div>
+          )}
         </div>
       </PopoverContent>
     </Popover>

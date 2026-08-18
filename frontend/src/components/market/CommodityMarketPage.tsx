@@ -66,7 +66,7 @@ export function CommodityMarketPage({ useData, title, subtitle, documentTitle }:
   const { converterMap, symbolsMap } = useCurrencies()
   const { data, isLoading, isError, error } = useData()
   const { i18n } = useTranslation()
-  const lang = i18n.language || 'ru'
+  const lang = i18n.language === 'ru' ? 'ru' : 'uk'
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
   useEffect(() => {

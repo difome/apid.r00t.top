@@ -20,8 +20,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Apid - Финансовые данные, курсы валют, котировки и медиа' },
-      { name: 'description', content: 'Сервис данных API: курсы валют, металлы, сырье, фильмы, мемы, факты, праздники.' },
+      { title: 'Apid - Фінансові дані, курси валют, котирування та медіа' },
+      { name: 'description', content: 'Сервіс даних API: курси валют, метали, сировина, фільми, меми, факти, свята.' },
     ],
   }),
   component: RootComponent,
