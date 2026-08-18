@@ -21,6 +21,9 @@ export const Route = createFileRoute('/admin')({
 })
 
 function AdminPage() {
+  const location = useLocation()
+  const pathname = location.pathname
+
   useEffect(() => {
     document.title = 'Admin | Apid'
   }, [])

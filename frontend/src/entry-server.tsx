@@ -28,6 +28,7 @@ export async function render(url: string, options: RenderOptions) {
   const router = createAppRouter(queryClient, lang)
   router.update({
     history: memoryHistory,
+    context: { queryClient, lang },
   })
 
   await router.load()
@@ -46,6 +47,7 @@ export async function render(url: string, options: RenderOptions) {
   for (const match of router.state.matches) {
     if (match.meta) {
       for (const m of match.meta) {
+        if (!m) continue
         if ('title' in m && m.title) {
           title = m.title
         } else if ('name' in m && 'content' in m && m.name && m.content) {
@@ -57,7 +59,8 @@ export async function render(url: string, options: RenderOptions) {
     }
     if (match.links) {
       for (const l of match.links) {
-        if ('rel' in l && 'href' in l) {
+        if (!l) continue
+        if ('rel' in l && 'href' in l && l.rel && l.href) {
           const hrefLangAttr = 'hrefLang' in l && l.hrefLang ? ` hreflang="${l.hrefLang}"` : ''
           headTags += `  <link rel="${l.rel}"${hrefLangAttr} href="${l.href}">\n`
         }

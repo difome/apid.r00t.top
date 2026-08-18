@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslation } from 'react-i18next'
 
 import { createSeoHead } from '@/lib/seo'
+import i18n from '@/i18n'
 
 export const Route = createFileRoute('/currency')({
   loader: ({ context }) => {
@@ -29,8 +30,8 @@ export const Route = createFileRoute('/currency')({
 
 function CurrencyPage() {
   const { list, converterMap, symbolsMap, isLoading, isError, error } = useCurrencies()
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language
+  const { t, i18n: i18nInstance } = useTranslation()
+  const lang = i18nInstance.language
 
   useEffect(() => {
     document.title = `${t('nav.currency')} | Apid`;
