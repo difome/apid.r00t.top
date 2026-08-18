@@ -31,18 +31,20 @@ const router = createAppRouter(queryClient, clientLang)
 
 const rootElement = document.getElementById('app')!
 
-if (rootElement.hasChildNodes()) {
-  ReactDOM.hydrateRoot(
-    rootElement,
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
-} else {
-  const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  )
-}
+void router.load().then(() => {
+  if (rootElement.hasChildNodes()) {
+    ReactDOM.hydrateRoot(
+      rootElement,
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    )
+  } else {
+    const root = ReactDOM.createRoot(rootElement)
+    root.render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    )
+  }
+})
