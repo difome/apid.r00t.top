@@ -11,6 +11,12 @@ declare global {
   }
 }
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', () => {
+    window.location.reload()
+  })
+}
+
 const clientLang = window.__INITIAL_LANG__ || detectClientLanguage()
 initI18n(clientLang)
 
