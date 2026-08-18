@@ -96,7 +96,7 @@ export function CommodityMarketPage({ useData, title, subtitle, documentTitle }:
   if (isError) {
     return (
       <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-400">
-        Не удалось загрузить данные: {error.message}
+        {i18n.t('common.errorLoading')}: {error.message}
       </div>
     )
   }
@@ -114,7 +114,7 @@ export function CommodityMarketPage({ useData, title, subtitle, documentTitle }:
 
       {assets.length === 0 ? (
         <div className="content-card p-5 text-sm text-muted-foreground">
-          Нет данных для отображения.
+          {i18n.t('common.noData')}
         </div>
       ) : (
         <MarketOverview
@@ -137,7 +137,7 @@ export function CommodityMarketPage({ useData, title, subtitle, documentTitle }:
       {formattedUpdateTime && (
         <div className="flex justify-center pt-6 border-t border-border">
           <div className="bg-card px-4 py-2 rounded-lg border border-border text-xs text-muted-foreground font-medium">
-            {lang === 'uk' ? `Актуально на: ${formattedUpdateTime}` : `Актуально на: ${formattedUpdateTime}`}
+            {i18n.t('currency.updatedAt', { time: formattedUpdateTime })}
           </div>
         </div>
       )}

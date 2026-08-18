@@ -216,7 +216,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
       return `${t('currency.historyFor')} ${selectedYear} ${t('currency.yearSign')}`;
     }
     if (days === 7300) {
-      return lang === 'uk' ? 'Вся історія котирувань' : 'Вся история котировок';
+      return t('currency.allHistory');
     }
     return `${t('currency.historyFor')} ${days} ${t('currency.daysSign')}`;
   }, [selectedYear, days, customStartDate, customEndDate, lang, t]);
@@ -332,7 +332,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
         {/* Row 2: Gorgeous Custom Date Range Picker inputs matching the screenshot */}
         <div className="flex items-center justify-between sm:justify-start gap-2 bg-card border border-border px-3 py-1.5 rounded-xl text-sm font-medium text-muted-foreground w-full md:w-auto overflow-x-auto scrollbar-none shrink-0 min-w-0">
           <span className="text-xs font-medium text-muted-foreground mr-1">
-            {lang === 'uk' ? 'Період:' : 'Период:'}
+            {t('common.period')}
           </span>
           <input 
             type="date" 
