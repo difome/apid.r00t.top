@@ -95,6 +95,11 @@ export function resolveLanguage(params?: ResolveLanguageParams): Language {
 export function detectClientLanguage(): Language {
   if (typeof window === 'undefined') return 'uk'
 
+  if (typeof window !== 'undefined' && (window as any).__INITIAL_LANG__) {
+    const fromServer = normalizeLanguage((window as any).__INITIAL_LANG__)
+    if (fromServer) return fromServer
+  }
+
   const queryHl = new URLSearchParams(window.location.search).get('hl')
   const cookieLang = getCookie(LANGUAGE_COOKIE)
 
