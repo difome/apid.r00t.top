@@ -28,6 +28,9 @@ if (window.__INITIAL_DATA__) {
 }
 
 const router = createAppRouter(queryClient, clientLang)
+if (typeof router.hydrate === 'function') {
+  router.hydrate()
+}
 
 const rootElement = document.getElementById('app')!
 
