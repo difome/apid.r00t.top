@@ -14,7 +14,10 @@ import { createSeoHead } from '@/lib/seo'
 
 export const Route = createFileRoute('/currency')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(currenciesQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(currenciesQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(currenciesQueryOptions())
   },
   head: () => createSeoHead({
     title: i18n.t('nav.currency'),

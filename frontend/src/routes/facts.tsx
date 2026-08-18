@@ -7,7 +7,10 @@ import i18n from '@/i18n'
 
 export const Route = createFileRoute('/facts')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(factsQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(factsQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(factsQueryOptions())
   },
   head: () => createSeoHead({
     title: i18n.t('nav.facts'),

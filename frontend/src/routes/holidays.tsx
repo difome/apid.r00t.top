@@ -7,7 +7,10 @@ import i18n from '@/i18n'
 
 export const Route = createFileRoute('/holidays')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(holidaysQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(holidaysQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(holidaysQueryOptions())
   },
   head: () =>
     createSeoHead({

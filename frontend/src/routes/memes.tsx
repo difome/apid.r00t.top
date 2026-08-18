@@ -7,7 +7,10 @@ import i18n from '@/i18n'
 
 export const Route = createFileRoute('/memes')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(memesQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(memesQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(memesQueryOptions())
   },
   head: () => createSeoHead({
     title: i18n.t('nav.memes'),

@@ -5,6 +5,7 @@ export const metalsQueryOptions = () =>
   queryOptions({
     queryKey: ['metals'],
     queryFn: fetchMetalsRates,
+    staleTime: 60000,
     refetchInterval: 60000,
   })
 
@@ -16,6 +17,7 @@ export const commoditiesQueryOptions = () =>
   queryOptions({
     queryKey: ['commodities_raw'],
     queryFn: fetchCommoditiesRates,
+    staleTime: 60000,
     refetchInterval: 60000,
   })
 

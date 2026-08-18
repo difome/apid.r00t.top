@@ -6,7 +6,10 @@ import i18n from '@/i18n'
 
 export const Route = createFileRoute('/metals')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(metalsQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(metalsQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(metalsQueryOptions())
   },
   head: () => createSeoHead({
     title: i18n.t('metals.pageTitle'),

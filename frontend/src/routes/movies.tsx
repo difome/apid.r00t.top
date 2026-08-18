@@ -7,7 +7,10 @@ import i18n from '@/i18n'
 
 export const Route = createFileRoute('/movies')({
   loader: ({ context }) => {
-    return context.queryClient.ensureQueryData(moviesQueryOptions())
+    if (typeof window === 'undefined') {
+      return context.queryClient.ensureQueryData(moviesQueryOptions())
+    }
+    void context.queryClient.prefetchQuery(moviesQueryOptions())
   },
   head: () => createSeoHead({
     title: i18n.t('nav.movies'),
