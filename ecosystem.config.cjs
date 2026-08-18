@@ -11,7 +11,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
+        PORT: 5008,
       },
     },
     {
@@ -24,8 +24,8 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001,
-        INTERNAL_API_URL: 'http://127.0.0.1:3000/api/v2',
+        PORT: 5009,
+        INTERNAL_API_URL: 'http://127.0.0.1:5008/api/v2',
         VITE_API_URL: '/api/v2',
       },
     },
