@@ -81,7 +81,7 @@ export function resolveLanguage(params?: ResolveLanguageParams): Language {
 
   if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
     // Client navigator language check
-    const navLangs = navigator.languages || [navigator.language]
+    const navLangs = navigator.languages
     for (const l of navLangs) {
       const match = normalizeLanguage(l)
       if (match) return match

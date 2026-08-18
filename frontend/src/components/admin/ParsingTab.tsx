@@ -115,7 +115,7 @@ export function ParsingTab() {
                               {details.map((line: string, i: number) => (
                                 <div key={i} className={`flex items-start gap-2 py-0.5 ${line.includes('❌') ? 'text-red-400' : 'text-muted-foreground'}`}>
                                   <span className="mt-1 opacity-50">•</span>
-                                  <span>{line.trim().replace(/^[✅❌ℹ️]\s*/, '')}</span>
+                                  <span>{line.trim().replace(/^(?:✅|❌|ℹ️)\s*/u, '')}</span>
                                 </div>
                               ))}
                             </div>

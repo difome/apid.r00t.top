@@ -74,7 +74,7 @@ export function CommodityMarketPage({ useData, title, subtitle, documentTitle }:
   }, [documentTitle])
 
   const assets = useMemo(() => {
-    return data?.data?.map(item => commodityToMarketAsset(item, lang)) ?? []
+    return data?.data.map(item => commodityToMarketAsset(item, lang)) ?? []
   }, [data, lang])
 
   const latestUpdateTime = useMemo(() => getLatestUpdateTime(assets), [assets])

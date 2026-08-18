@@ -51,8 +51,8 @@ function CurrencyPage() {
   }, []);
 
   const latestUpdateTime = useMemo(() => {
-    if (!list || list.length === 0) return null
-    const times = list.map(c => new Date(c.latestRate.createdAt).getTime()).filter(t => !isNaN(t))
+    if (list.length === 0) return null
+    const times = list.map(c => new Date(c.latestRate.createdAt).getTime()).filter(timeVal => !isNaN(timeVal))
     if (times.length === 0) return null
     const maxTime = Math.max(...times)
     return new Date(maxTime)

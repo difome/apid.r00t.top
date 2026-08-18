@@ -1,7 +1,8 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-import { useState, type ReactNode } from "react"
+import { useState  } from "react"
+import type {ReactNode} from "react";
 import type { CurrencyMeta } from "@/types/currency"
 
 interface CurrencySelectorProps {

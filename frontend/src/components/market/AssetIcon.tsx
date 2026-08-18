@@ -50,9 +50,9 @@ const fiatFlags: Record<string, string> = {
 
 export function AssetIcon({ code = '', type, emoji }: AssetIconProps) {
   const normalizedCode = code.toUpperCase()
-  const token = iconTokens[normalizedCode]
 
-  if (token) {
+  if (normalizedCode in iconTokens) {
+    const token = iconTokens[normalizedCode]
     return (
       <span
         className="inline-flex h-5 w-5 items-center justify-center rounded-md text-[9px] tracking-tight"

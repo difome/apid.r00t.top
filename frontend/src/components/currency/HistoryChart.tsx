@@ -2,7 +2,8 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { RefreshCcw, TrendingUp, TrendingDown, Clock, Calendar, XIcon } from "lucide-react"
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useCurrencyHistory, useCurrencyYears, useCurrencies } from "@/hooks/use-currencies"
-import { type ElementType, useMemo, useState, useEffect, useRef } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
+import type { ElementType } from "react"
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -12,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { HistoryPoint, MarketAsset } from '@/types/market'
+import type { MarketAsset } from '@/types/market'
 import { formatDateForInput, getChartStats, getLocale, toChartPoints } from '@/lib/history-chart'
 import { useMediaQuery } from '@/hooks/use-media-query'
 
@@ -82,8 +83,8 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
   const { data: yearsRes } = useCurrencyYears(selectedKey, basePath)
 
   const years = useMemo(() => {
-    if (!yearsRes?.success || !yearsRes.data) return []
-    return (yearsRes.data as number[]).filter(y => y >= 1999).sort((a, b) => b - a)
+    if (!yearsRes?.success) return []
+    return yearsRes.data.filter(y => y >= 1999).sort((a, b) => b - a)
   }, [yearsRes])
 
   const { data: historyRes, isLoading } = useCurrencyHistory(
@@ -109,7 +110,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
       const end = today;
       const start = new Date();
       if (days === 7300) {
-        if (historyRes?.success && historyRes.data && historyRes.data.length > 0) {
+        if (historyRes?.success && historyRes.data.length > 0) {
           const firstDate = new Date(historyRes.data[0].createdAt);
           setCustomStartDate(formatDateForInput(firstDate));
         } else {
@@ -126,7 +127,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
 
   const currency = useMemo(() => {
     if (currencyData) return currencyData;
-    return currencies?.find(c => c.key === selectedKey) || null;
+    return (selectedKey ? currencies.find(c => c.key === selectedKey) : null) ?? null;
   }, [currencies, selectedKey, currencyData]);
 
   useEffect(() => {
@@ -161,12 +162,10 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
   }, [selectedKey, days, selectedYear, customStartDate, customEndDate]);
 
   const historyData = useMemo(() => {
-    if (!historyRes?.success || !historyRes.data) return []
+    if (!historyRes?.success) return []
     const isIntraday = days === 1 && selectedYear === undefined;
-    return toChartPoints(historyRes.data as HistoryPoint[], lang, isIntraday)
+    return toChartPoints(historyRes.data, lang, isIntraday)
   }, [historyRes, lang, days, selectedYear])
-
-
 
   const stats = useMemo(() => {
     return getChartStats(historyData)
@@ -211,15 +210,15 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
         const d = new Date(dStr);
         return d.toLocaleDateString(getLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
       };
-      return `${t('currency.historyFor') || 'История за'} ${formatD(customStartDate)} — ${formatD(customEndDate)}`;
+      return `${t('currency.historyFor')} ${formatD(customStartDate)} — ${formatD(customEndDate)}`;
     }
     if (selectedYear) {
-      return `${t('currency.historyFor') || 'История за'} ${selectedYear} ${t('currency.yearSign') || 'год'}`;
+      return `${t('currency.historyFor')} ${selectedYear} ${t('currency.yearSign')}`;
     }
     if (days === 7300) {
       return lang === 'uk' ? 'Вся історія котирувань' : 'Вся история котировок';
     }
-    return `${t('currency.historyFor') || 'История за'} ${days} ${t('currency.daysSign') || 'дней'}`;
+    return `${t('currency.historyFor')} ${days} ${t('currency.daysSign')}`;
   }, [selectedYear, days, customStartDate, customEndDate, lang, t]);
 
   const renderInnerContent = (inDialog: boolean) => {
@@ -259,7 +258,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
               {formatPrice(Number(currency.latestRate.price))}
             </div>
             <div className="text-xs text-muted-foreground font-medium mt-0.5">
-              {t('currency.currentRate') || 'Текущий курс'}
+              {t('currency.currentRate')}
             </div>
           </div>
         )}
@@ -269,11 +268,11 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
       <div className="relative z-10 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between mb-4 w-full min-w-0">
         <div className="flex bg-card p-1 rounded-xl border border-border items-center gap-1 overflow-x-auto w-full md:w-auto scrollbar-none shrink-0 min-w-0">
           {[
-            { d: 7, label: t('currency.period_7d') || 'Неделя' },
-            { d: 30, label: t('currency.period_30d') || 'Месяц' },
-            { d: 90, label: t('currency.period_90d') || 'Квартал' },
-            { d: 365, label: t('currency.period_365d') || 'Год' },
-            { d: 7300, label: t('currency.period_max') || 'Макс.' }
+            { d: 7, label: t('currency.period_7d') },
+            { d: 30, label: t('currency.period_30d') },
+            { d: 90, label: t('currency.period_90d') },
+            { d: 365, label: t('currency.period_365d') },
+            { d: 7300, label: t('currency.period_max') }
           ].map(({ d, label }) => {
             const isActive = days === d && selectedYear === undefined;
             return (
@@ -312,7 +311,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
               >
                 <SelectTrigger className="h-8 bg-transparent hover:bg-secondary border-0 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground focus:ring-0 focus:ring-offset-0 px-3 min-w-[95px] transition-colors shrink-0">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                  <SelectValue placeholder={t('currency.selectYear') || 'Год'} />
+                  <SelectValue placeholder={t('currency.selectYear')} />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end" className="bg-popover border-border rounded-xl max-h-[220px] shadow-lg mt-1.5 min-w-[110px]">
                   {years.map((y) => (
@@ -321,7 +320,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
                       value={String(y)}
                       className="text-xs font-semibold text-muted-foreground focus:bg-secondary focus:text-foreground rounded-lg py-2 pr-8 pl-3 cursor-pointer transition-colors"
                     >
-                      {y} {t('currency.yearSign') || 'г.'}
+                      {y} {t('currency.yearSign')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -378,7 +377,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <RefreshCcw className="w-8 h-8 animate-spin text-primary" />
             <span className="text-xs font-medium text-muted-foreground animate-pulse">
-              {t('currency.loadingData') || 'Загрузка истории...'}
+              {t('currency.loadingData')}
             </span>
           </div>
         ) : historyData.length > 0 ? (
@@ -424,7 +423,7 @@ export function HistoryChart({ selectedKey, onClose, basePath = '/currency', cur
                 <Tooltip 
                   cursor={{ stroke: chartColor, strokeWidth: 1, strokeDasharray: '4 4' }}
                   content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    if (active && payload.length) {
                       const data = payload[0].payload;
                       return (
                         <div className="bg-popover border border-border rounded-xl p-3 shadow-lg flex flex-col gap-0.5 min-w-[120px] text-popover-foreground">

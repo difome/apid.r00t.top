@@ -66,7 +66,7 @@ export function useCurrencies() {
     const currencies = query.data.data
     const cMap: Record<string, number> = {}
     const sMap: Record<string, CurrencyMeta> = {}
-    const currentLang = lang || 'uk'
+    const currentLang = lang
 
     const cleanList = currencies.map((c) => {
       const trans = c.params?.translation
@@ -94,7 +94,7 @@ export function useCurrencies() {
       const base = c.baseCurrency.toUpperCase()
       const trans = c.params?.translation
 
-      if (!sMap[base]) {
+      if (!(base in sMap)) {
         const isBaseMain = base !== 'USD'
         sMap[base] = {
           symbol: isBaseMain ? c.symbol : '$',
@@ -105,7 +105,7 @@ export function useCurrencies() {
       }
 
       const target = c.targetCurrency.toUpperCase()
-      if (!sMap[target]) {
+      if (!(target in sMap)) {
         const isTargetMain = target !== 'USD'
         sMap[target] = {
           symbol: isTargetMain ? c.symbol : '$',

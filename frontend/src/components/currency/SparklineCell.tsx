@@ -8,7 +8,7 @@ export function SparklineCell({ currencyKey, days, type }: { currencyKey: string
   const { data, isLoading } = useCurrencyHistory(currencyKey, days, undefined, undefined, undefined, basePath);
 
   const parsedData = useMemo(() => {
-    if (!data?.success || !data?.data || data.data.length === 0) return null;
+    if (!data?.success || data.data.length === 0) return null;
     const history = data.data;
     const sorted = [...history].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     

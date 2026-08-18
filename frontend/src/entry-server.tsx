@@ -2,7 +2,8 @@ import ReactDOMServer from 'react-dom/server'
 import { RouterProvider, createMemoryHistory } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider, dehydrate } from '@tanstack/react-query'
 import { createAppRouter } from './router'
-import { initI18n, type Language } from './i18n'
+import { initI18n  } from './i18n'
+import type {Language} from './i18n';
 
 export interface RenderOptions {
   lang: Language

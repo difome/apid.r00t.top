@@ -187,10 +187,10 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="bg-secondary w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                          {meta?.emoji || curr.substring(0, 2)}
+                          {meta.emoji || curr.substring(0, 2)}
                         </div>
                         <div className="flex flex-col text-left justify-center">
-                          <span className="font-medium text-sm text-foreground leading-tight">{meta?.name || curr}</span>
+                          <span className="font-medium text-sm text-foreground leading-tight">{meta.name || curr}</span>
                           <span className="text-[10px] text-muted-foreground font-semibold leading-none mt-[1px]">{curr}</span>
                         </div>
                       </div>
@@ -300,7 +300,7 @@ export function MarketOverview({ currencies, converterMap, symbolsMap, onSelect,
                   <td className="px-4 py-3 text-right">
                     <div className="flex flex-col items-end">
                       <span className="text-sm font-semibold tracking-tight text-foreground flex items-center justify-end">
-                        <span className="text-muted-foreground font-medium text-xs mr-1">{symbolsMap[displayCurrency]?.symbol || displayCurrency}</span>
+                        <span className="text-muted-foreground font-medium text-xs mr-1">{symbolsMap[displayCurrency].symbol || displayCurrency}</span>
                         {price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                       </span>
                     </div>

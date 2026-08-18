@@ -70,7 +70,7 @@ export function CurrencyConverter({ symbolsMap }: CurrencyConverterProps) {
                        </div>
                        <div className="flex flex-col gap-0.5">
                            <span className="text-sm font-semibold text-foreground tracking-tight">{from}</span>
-                           <span className="text-xs font-medium text-muted-foreground">{fromMeta?.name}</span>
+                           <span className="text-xs font-medium text-muted-foreground">{fromMeta.name}</span>
                        </div>
                     </div>
                     <ArrowDownIcon className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-all group-hover:translate-y-0.5" />
@@ -124,7 +124,7 @@ export function CurrencyConverter({ symbolsMap }: CurrencyConverterProps) {
                        </div>
                        <div className="flex flex-col gap-0.5">
                            <span className="text-sm font-semibold text-foreground tracking-tight">{to}</span>
-                           <span className="text-xs font-medium text-muted-foreground">{toMeta?.name}</span>
+                           <span className="text-xs font-medium text-muted-foreground">{toMeta.name}</span>
                        </div>
                     </div>
                     <ArrowDownIcon className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-all group-hover:translate-y-0.5" />
