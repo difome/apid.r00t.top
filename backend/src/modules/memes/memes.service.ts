@@ -58,7 +58,8 @@ export class MemeService {
 
     private async getMemeFromAnekdotMe(): Promise<MemeData> {
         const response = await fetch(this.sources[0].baseUrl, {
-            headers: this.headers
+            headers: this.headers,
+            signal: AbortSignal.timeout(3500)
         });
         if (!response.ok) {
             throw new Error(`AnekdotMe parse error: ${response.statusText}`);
@@ -128,7 +129,8 @@ export class MemeService {
             : `${this.sources[1].baseUrl}p${randomPage}/`;
 
         const response = await fetch(url, {
-            headers: this.spacesHeaders
+            headers: this.spacesHeaders,
+            signal: AbortSignal.timeout(3500)
         });
         if (!response.ok) {
             throw new Error(`SpacesIm parse error: ${response.statusText}`);
@@ -173,7 +175,8 @@ export class MemeService {
         if (detailUrl) {
             try {
                 const detailResponse = await fetch(detailUrl, {
-                    headers: this.spacesHeaders
+                    headers: this.spacesHeaders,
+                    signal: AbortSignal.timeout(3500)
                 });
                 if (detailResponse.ok) {
                     const detailHtml = await detailResponse.text();
@@ -246,7 +249,8 @@ export class MemeService {
                 "Referer": "https://topmemas.top/",
                 "X-Requested-With": "XMLHttpRequest",
             },
-            body
+            body,
+            signal: AbortSignal.timeout(3500)
         });
         if (!response.ok) {
             throw new Error(`Topmemas API error: ${response.statusText}`);
