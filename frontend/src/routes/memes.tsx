@@ -20,6 +20,14 @@ export const Route = createFileRoute('/memes')({
   component: MemesPage,
 })
 
+const getMemeImageUrl = (url: string | undefined | null) => {
+  if (!url) return ''
+  if (url.startsWith('http://127.0.0.1') || url.startsWith('http://localhost')) {
+    return url.replace(/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?/, '')
+  }
+  return url
+}
+
 function MemesPage() {
   const { data, isLoading, refetch, isRefetching } = useRandomMeme()
   const { t } = useTranslation()
@@ -50,7 +58,7 @@ function MemesPage() {
         <div className={`space-y-5 transition-all duration-500 ${isRefetching ? 'opacity-50 scale-[0.99]' : 'opacity-100 scale-100'}`}>
           <div className="content-card overflow-hidden flex items-center justify-center min-h-[300px]">
             <img 
-              src={meme.image} 
+              src={getMemeImageUrl(meme.image)} 
               alt={meme.description} 
               className="w-full h-auto object-contain max-h-[50vh] md:max-h-[60vh] mx-auto animate-in fade-in zoom-in duration-500"
               loading="lazy"

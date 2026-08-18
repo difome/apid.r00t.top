@@ -39,8 +39,11 @@ export const memesRouter: FastifyPluginAsyncZod = async (fastify) => {
     }, async (request, reply) => {
         const meme = await fastify.memeService.getRandomMeme();
         const forwardedProto = request.headers['x-forwarded-proto'];
+        const forwardedHost = request.headers['x-forwarded-host'];
+        const host = typeof forwardedHost === 'string' ? forwardedHost : (typeof request.headers.host === 'string' ? request.headers.host : request.hostname);
         const protocol = typeof forwardedProto === 'string' ? forwardedProto : request.protocol;
-        const baseUrl = `${protocol}://${request.hostname}`;
+        const isLocalInternal = host.includes('127.0.0.1') || host.includes('localhost');
+        const baseUrl = process.env.API_URL || (isLocalInternal ? '' : `${protocol}://${host}`);
         const encodedUrl = toSafeBase64(meme.data.result.image);
         meme.data.result.image = `${baseUrl}/api/v2/memes/image-proxy/${encodedUrl}/meme.jpg`;
         return meme;
