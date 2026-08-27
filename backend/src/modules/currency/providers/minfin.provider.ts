@@ -3,7 +3,7 @@ import { config } from "@/config";
 
 export class MinfinProvider implements ICurrencyProvider {
     name = 'minfin';
-    private url = config.providers.minfinUrl || "https://api.minfin.com.ua/currency/rates/nbu?locale=uk";
+    private url = "https://api.minfin.com.ua/currency/rates/nbu?locale=uk";
     private cache: any = null;
 
     clearCache() {
