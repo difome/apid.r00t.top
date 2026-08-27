@@ -5,7 +5,7 @@ import { DEFAULT_USER_AGENT } from "@/lib/http";
 
 export class CBRProvider implements ICurrencyProvider {
     name = 'cbr';
-    private url = config.providers.cbrApiUrl || "https://www.cbr.ru/currency_base/daily/";
+    private url = "https://www.cbr.ru/currency_base/daily/";
     private cache: Map<string, number> | null = null;
 
     clearCache() {

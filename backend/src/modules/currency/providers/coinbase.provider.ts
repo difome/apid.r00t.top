@@ -3,7 +3,8 @@ import { config } from "@/config";
 
 export class CoinbaseProvider implements ICurrencyProvider {
     name = 'coinbase';
-    private url = config.providers.coinbaseApiUrl ? `${config.providers.coinbaseApiUrl}/graphql/query` : "https://www.coinbase.com/graphql/query";
+    private graphqlUrl = "https://www.coinbase.com/graphql/query";
+    private restUrl = config.providers.coinbaseApiUrl || "https://api.coinbase.com/v2";
 
     async fetchRate(base: string, target: string, params?: any): Promise<number> {
         const baseUpper = base.toUpperCase();
@@ -32,7 +33,7 @@ export class CoinbaseProvider implements ICurrencyProvider {
             }
         };
 
-        const response = await fetch(this.url, {
+        const response = await fetch(this.graphqlUrl, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -55,7 +56,7 @@ export class CoinbaseProvider implements ICurrencyProvider {
 
 
     private async fetchRest(base: string, target: string): Promise<number> {
-        const response = await fetch(`https://api.coinbase.com/v2/prices/${base}-${target}/spot`);
+        const response = await fetch(`${this.restUrl}/prices/${base}-${target}/spot`);
         if (!response.ok) throw new Error(`Coinbase REST error: ${response.statusText}`);
         const json = await response.json() as any;
         return parseFloat(json.data.amount);
